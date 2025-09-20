@@ -24,6 +24,7 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
@@ -38,7 +39,7 @@
 
 #define MAX_COMMAND_SIZE 128    // The maximum command-line size
 
-#define MAX_NUM_ARGUMENTS 1     // Mav shell currently only supports one argument
+#define MAX_NUM_ARGUMENTS 5     // Mav shell currently only supports one argument
 
 int main()
 {
@@ -91,13 +92,24 @@ int main()
     }
 
     // Now print the tokenized input as a debug check
-    // \TODO Remove this for loop and replace with your shell functionality
-
     int token_index  = 0;
-    for( token_index = 0; token_index < token_count; token_index ++ ) 
+
+    //Start the fork process and call execl 
+    pid_t child_pid = fork();
+    int status;
+
+    if( child_pid == 0 )
+    {
+      execl("/bin/ls", "ls", NULL );
+      exit( EXIT_SUCCESS );
+    }
+
+    waitpid( child_pid, &status, 0 );
+
+    /*for( token_index = 0; token_index < token_count; token_index ++ ) 
     {
       printf("token[%d] = %s\n", token_index, token[token_index] );  
-    }
+    }*/
 
     // Cleanup allocated memory
     for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
