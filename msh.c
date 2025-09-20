@@ -91,29 +91,29 @@ int main()
         token_count++;
     }
 
-    // Now print the tokenized input as a debug check
-    int token_index  = 0;
-
-    //Start the fork process and call execl 
-      pid_t pid = fork( );
+    //Start the fork process and call execvp 
+    pid_t pid = fork( );
 
     if( pid == 0 )
     {
       // Notice you can add as many NULLs on the end as you want
-      int ret = execl( "/bin/ls", "ls", "-a", "-l", "-t", NULL, NULL, NULL, NULL );  
+      int ret = execvp( token[0], token );  
 
       if( ret == -1 )
       {
-        perror("execl failed: ");
+        printf("%s: Command not found.\n", token[0]);
       }
     }
+
     else 
     {
       int status;
       wait( & status );
     }
 
-    /*for( token_index = 0; token_index < token_count; token_index ++ ) 
+    /* Now print the tokenized input as a debug check
+    int token_index  = 0;
+    for( token_index = 0; token_index < token_count; token_index ++ ) 
     {
       printf("token[%d] = %s\n", token_index, token[token_index] );  
     }*/
