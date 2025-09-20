@@ -45,6 +45,8 @@ int main()
 {
 
   char * command_string = (char*) malloc( MAX_COMMAND_SIZE );
+  int count = 0;
+  char history[50][MAX_COMMAND_SIZE];
 
   while( 1 )
   {
@@ -57,6 +59,23 @@ int main()
     // inputs something since fgets returns NULL when there
     // is no input
     while( !fgets (command_string, MAX_COMMAND_SIZE, stdin) );
+
+    //put input into an array for history function if not whitespace
+    if(command_string[0] != '\0')
+    {
+      if(count < 50)
+      {
+        strcpy(history[count], command_string);
+        count++;
+      }
+    }
+
+    //if command starts with an exclamation mark convert the number after it, copy the command at that index-1 then use it instead
+    if (command_string[0] == '!')
+    {
+      int n = atoi(command_string + 1);
+      strcpy(command_string, history[n-1]);
+    }
 
     /* Parse input */
     char *token[MAX_NUM_ARGUMENTS];
@@ -91,10 +110,20 @@ int main()
         token_count++;
     }
 
+    //If the command is cd then take the next argument as the path and change directory in parent
     if(strcmp(token[0], "cd") == 0)
     {
       const char *path = token[1];
       chdir(path);
+    }
+
+    //If the command is history then print the index number + 1 and the string/command stored in history array at that index
+    else if(strcmp(token[0], "history") == 0)
+    {
+      for(int i = 0; i < count; i++)
+      {
+        printf("[%d] %s\n", i + 1, history[i]);
+      }
     }
     
     //Token[0] == NULL causes seg faults. Added this to prevent & ask reprompt quietly
@@ -140,10 +169,4 @@ int main()
       }
     }
   }
-    /* Now print the tokenized input as a debug check
-    int token_index  = 0;
-    for( token_index = 0; token_index < token_count; token_index ++ ) 
-    {
-      printf("token[%d] = %s\n", token_index, token[token_index] );  
-    }*/
 }
