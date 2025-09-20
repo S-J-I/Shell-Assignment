@@ -90,9 +90,15 @@ int main()
       }
         token_count++;
     }
+
+    if(strcmp(token[0], "cd") == 0)
+    {
+      const char *path = token[1];
+      chdir(path);
+    }
     
     //Token[0] == NULL causes seg faults. Added this to prevent & ask reprompt quietly
-    if(token[0] != NULL)
+    else if(token[0] != NULL)
     {
       // Cleanup allocated memory if tok0 is either quit or exit
       if (strcmp(token[0], "exit") == 0 || strcmp(token[0], "quit") == 0)
