@@ -95,16 +95,23 @@ int main()
     int token_index  = 0;
 
     //Start the fork process and call execl 
-    pid_t child_pid = fork();
-    int status;
+      pid_t pid = fork( );
 
-    if( child_pid == 0 )
+    if( pid == 0 )
     {
-      execl("/bin/ls", "ls", NULL );
-      exit( EXIT_SUCCESS );
-    }
+      // Notice you can add as many NULLs on the end as you want
+      int ret = execl( "/bin/ls", "ls", "-a", "-l", "-t", NULL, NULL, NULL, NULL );  
 
-    waitpid( child_pid, &status, 0 );
+      if( ret == -1 )
+      {
+        perror("execl failed: ");
+      }
+    }
+    else 
+    {
+      int status;
+      wait( & status );
+    }
 
     /*for( token_index = 0; token_index < token_count; token_index ++ ) 
     {
