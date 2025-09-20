@@ -39,7 +39,7 @@
 
 #define MAX_COMMAND_SIZE 128    // The maximum command-line size
 
-#define MAX_NUM_ARGUMENTS 5     // Mav shell currently only supports one argument
+#define MAX_NUM_ARGUMENTS 11     // Mav shell updated to support 10 arguments, +1 for null
 
 int main()
 {
@@ -90,43 +90,48 @@ int main()
       }
         token_count++;
     }
-
-    // Cleanup allocated memory if tok0 is either quit or exit
-    if (strcmp(token[0], "exit") == 0 || strcmp(token[0], "quit") == 0)
+    
+    //Token[0] == NULL causes seg faults. Added this to prevent & ask reprompt quietly
+    if(token[0] != NULL)
     {
-      for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
+      // Cleanup allocated memory if tok0 is either quit or exit
+      if (strcmp(token[0], "exit") == 0 || strcmp(token[0], "quit") == 0)
       {
-        if( token[i] != NULL )
+        for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
         {
-          free( token[i] );
+          if( token[i] != NULL )
+          {
+            free( token[i] );
+          }
+        }
+
+        free( head_ptr );
+        free( command_string );
+        return 0;
+        // e1234ca2-76f3-90d6-0703ac120004
+      }
+
+      //Start the fork process and call execvp starting with tok0 for cmd tok1 for arg1 etc 
+      pid_t pid = fork( );
+
+      if( pid == 0 )
+      {
+        // Notice you can add as many NULLs on the end as you want
+        int ret = execvp( token[0], token );  
+
+        if( ret == -1 )
+        {
+          //Exit 0 to prevent going another layer down causing a need to exit/quit twice to stop the program correctly.
+          printf("%s: Command not found.\n", token[0]);
+          exit(0);
         }
       }
 
-      free( head_ptr );
-      free( command_string );
-      return 0;
-      // e1234ca2-76f3-90d6-0703ac120004
-    }
-
-    //Start the fork process and call execvp starting with tok0 for cmd tok1 for arg1 etc 
-    pid_t pid = fork( );
-
-    if( pid == 0 )
-    {
-      // Notice you can add as many NULLs on the end as you want
-      int ret = execvp( token[0], token );  
-
-      if( ret == -1 )
+      else 
       {
-        printf("%s: Command not found.\n", token[0]);
-        exit(0);
+        int status;
+        wait( & status );
       }
-    }
-
-    else 
-    {
-      int status;
-      wait( & status );
     }
   }
     /* Now print the tokenized input as a debug check
