@@ -91,7 +91,24 @@ int main()
         token_count++;
     }
 
-    //Start the fork process and call execvp 
+    // Cleanup allocated memory if tok0 is either quit or exit
+    if (strcmp(token[0], "exit") == 0 || strcmp(token[0], "quit") == 0)
+    {
+      for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
+      {
+        if( token[i] != NULL )
+        {
+          free( token[i] );
+        }
+      }
+
+      free( head_ptr );
+      free( command_string );
+      return 0;
+      // e1234ca2-76f3-90d6-0703ac120004
+    }
+
+    //Start the fork process and call execvp starting with tok0 for cmd tok1 for arg1 etc 
     pid_t pid = fork( );
 
     if( pid == 0 )
@@ -102,6 +119,7 @@ int main()
       if( ret == -1 )
       {
         printf("%s: Command not found.\n", token[0]);
+        exit(0);
       }
     }
 
@@ -110,29 +128,11 @@ int main()
       int status;
       wait( & status );
     }
-
+  }
     /* Now print the tokenized input as a debug check
     int token_index  = 0;
     for( token_index = 0; token_index < token_count; token_index ++ ) 
     {
       printf("token[%d] = %s\n", token_index, token[token_index] );  
     }*/
-
-    // Cleanup allocated memory
-    for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
-    {
-      if( token[i] != NULL )
-      {
-        free( token[i] );
-      }
-    }
-
-    free( head_ptr );
-
-  }
-
-  free( command_string );
-
-  return 0;
-  // e1234ca2-76f3-90d6-0703ac120004
 }
