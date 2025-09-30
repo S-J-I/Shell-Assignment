@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <string.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #define WHITESPACE " \t\n"      // We want to split our command line up into tokens
                                 // so we need to define what delimits our tokens.
@@ -41,7 +42,7 @@
 
 #define MAX_NUM_ARGUMENTS 11     // Mav shell updated to support 10 arguments, +1 for null
 
-int main()
+int main( int argc, char * argv[] )
 {
 
   char * command_string = (char*) malloc( MAX_COMMAND_SIZE );
